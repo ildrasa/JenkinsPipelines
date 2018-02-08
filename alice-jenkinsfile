@@ -11,7 +11,7 @@ node () {
 	stage ('alice rest api - Build') {
 	
  		// Maven build step
- 		echo '  +++ Maven build +++ '
+ 		echo '  +++ Maven build for Alice API +++ '
 		withMaven(maven: 'maven', mavenOpts: '-Dmaven.test.failure.ignore=true') { 
  			if(isUnix()) {
  				sh "mvn -e clean compile test package " 
@@ -51,6 +51,7 @@ node () {
  		"""
  		
  		// Maven build step
+ 		echo '  +++ Maven build for Alice integration tests +++ '
 		withMaven(maven: 'maven', mavenOpts: '-Dmaven.test.failure.ignore=true') { 
  			if(isUnix()) {
  				sh "mvn -e compile test " 
