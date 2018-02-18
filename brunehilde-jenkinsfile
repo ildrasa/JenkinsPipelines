@@ -1,0 +1,55 @@
+// add timestamps in build log console
+timestamps {
+
+node () {
+
+	// checkout alice rest api
+	stage ('brunehilde python app - Checkout') {
+ 	 checkout([$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: 'a5e25869-0c8b-44a5-a230-4523b1cee0e7', url: 'https://github.com/ildrasa/BrunehildePythonApp/']]]) 
+	}
+	
+	stage ('brunehilde python app - Build') {
+		
+ 		// Shell build step
+ 		echo '  +++ docker image build +++ '
+		sh """ 
+			cd ${WORKSPACE}
+			# build docker image for brunehilde
+			docker build -t 127.0.0.1:5000/brunehilde:SNAPSHOT .
+			# push image in the docker registry
+			docker push 127.0.0.1:5000/brunehilde:SNAPSHOT 
+ 		""" 
+	}
+	
+	stage ('brunehilde integration test - Checkout') {
+ 	 checkout([$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: 'a5e25869-0c8b-44a5-a230-4523b1cee0e7', url: 'https://github.com/ildrasa/BrunehildeIntegrationTests']]]) 
+	}
+	
+	stage ('brunhilde integration test - start') {
+ 		
+ 		// Shell build step
+ 		echo '  +++ docker-compose start network +++ '
+		sh """ 
+			# login into docker
+			docker login 127.0.0.1:5000 -u jenkins -p jenkins
+			cd ${WORKSPACE}
+			# start docker compose
+			docker-compose up -d
+ 		"""
+ 		
+ 		// shell build step
+ 		echo '  +++ Run shell script for Brunehilde integration tests +++ '
+		sh """ 
+			# run test script
+			sh integration_tests.sh	
+		"""
+ 		
+ 		// Shell build step
+		echo '  +++ docker-compose network stop +++ '
+		sh """ 
+			# stop docker-compose
+			docker-compose down
+		""" 
+	}
+}
+}
