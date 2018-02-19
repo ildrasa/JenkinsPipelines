@@ -26,7 +26,6 @@ node () {
 	}
 	
 	stage ('brunhilde integration test - start') {
- 		
  		// Shell build step
  		echo '  +++ docker-compose start network +++ '
 		sh """ 
@@ -36,13 +35,20 @@ node () {
 			# start docker compose
 			docker-compose up -d
  		"""
- 		
+ 	}
+	
+	stage ('brunhilde integration test - test') {
+ 				
  		// shell build step
  		echo '  +++ Run shell script for Brunehilde integration tests +++ '
 		sh """ 
 			# run test script
+			dos2unix integration_tests.sh
 			sh integration_tests.sh	
 		"""
+ 	}
+ 	
+ 	stage ('brunhilde integration test - stop') {
  		
  		// Shell build step
 		echo '  +++ docker-compose network stop +++ '
